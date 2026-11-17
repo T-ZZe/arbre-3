@@ -11,9 +11,16 @@ jobs:
         with:
           distribution: temurin
           java-version: '25'
-          cache: maven
       - name: Compiler
-        run: mvn -B -f "$(find . -path '*/Arbres/pom.xml' | head -1)" package
+        run: |
+          POM=$(find . -name pom.xml -not -path '*/target/*' | head -1)
+          if [ -z "$POM" ]; then
+            echo "Aucun pom.xml dans le depot. Fichiers presents :"
+            find . -type f -not -path './.git/*' | head -50
+            exit 1
+          fi
+          echo "pom trouve : $POM"
+          mvn -B -f "$POM" package
       - uses: actions/upload-artifact@v4
         with:
           name: Arbres-jar
